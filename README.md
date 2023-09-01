@@ -1,4 +1,4 @@
-# nestJs + prisma + posgresql
+# nestJs + prisma + postgresql
 
 1. nest, prisma 설치
 
