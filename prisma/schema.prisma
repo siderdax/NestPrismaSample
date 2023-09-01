@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Content1 {
+  id         Int                    @id @default(autoincrement())
+  name       String                 @unique
+  categories ContentsOnCategories[]
+}
+
+model Category1 {
+  id       Int                    @id @default(autoincrement())
+  name     String                 @unique
+  contents ContentsOnCategories[]
+}
+
+model Content2 {
+  id         Int         @id @default(autoincrement())
+  name       String      @unique
+  categories Category2[]
+}
+
+model Category2 {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  content2s Content2[]
+}
+
+model ContentsOnCategories {
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  content     Content1  @relation(fields: [content1Id], references: [id])
+  category    Category1 @relation(fields: [category1Id], references: [id])
+  content1Id  Int
+  category1Id Int
+
+  @@id([content1Id, category1Id])
+}
