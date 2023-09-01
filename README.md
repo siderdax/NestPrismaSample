@@ -125,4 +125,4 @@
       }
       ```
 
-   2. 위 예제 주소: 
+   2. 위 예제 주소: https://github.com/siderdax/NestPrismaSample
