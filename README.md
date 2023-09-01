@@ -1,73 +1,128 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+##### nestJs + prisma + posgresql + graphql
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+1. nest, prisma 설치
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+2. nest n <project-name>
 
-## Description
+3. 프로젝트 디렉토리 진입
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+4. PrismaClient 설치
 
-## Installation
+   ```bash
+   npm install @prisma/client
+   ```
 
-```bash
-$ npm install
-```
+5. https://docs.nestjs.com/recipes/prisma#set-up-prisma
 
-## Running the app
+   1. npx prisma init
 
-```bash
-# development
-$ npm run start
+   2. ./.env DATABASE_URL 편집
 
-# watch mode
-$ npm run start:dev
+      1. database 생성 필요
 
-# production mode
-$ npm run start:prod
-```
+      2. https://www.postgresql.org/docs/current/sql-createdatabase.html
 
-## Test
+         ```sql
+         CREATE DATABASE jointest
+             WITH
+             OWNER = kyi
+             TEMPLATE = template0
+             ENCODING = 'UTF8'
+             LC_COLLATE = 'en_US.UTF-8'
+             LC_CTYPE = 'C'
+             TABLESPACE = pg_default
+             CONNECTION LIMIT = -1
+             IS_TEMPLATE = False;
+         ```
 
-```bash
-# unit tests
-$ npm run test
+      3. 또는 pgAdmin 이용
 
-# e2e tests
-$ npm run test:e2e
+   3. schema 편집
 
-# test coverage
-$ npm run test:cov
-```
+      1. 모델링: https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#model
+      2. Seeding(Optional)
+         1. https://steelcup.home.blog/2023/09/01/prisma-seed-정리/
 
-## Support
+   4. npx prisma migrate dev --name init
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+6. nest prisma service+
 
-## Stay in touch
+   1. https://docs.nestjs.com/recipes/prisma#set-up-prisma
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+   2. nest g mo prisma
 
-## License
+      1. 모듈 안 만들고 서비스만 만들어서 사용해도 되지만 모듈을 만들면 관리가 편함
+      2. Service 만들기 전에 먼저 만들어야 알아서 같은 이름의 Service를 AppModule이 아닌 동명의 Module에 연동해주므로 먼저 생성해야 편함
 
-Nest is [MIT licensed](LICENSE).
+   3. nest g s prisma
+
+      1. PrismaClient 연동
+
+         ```typescript
+         @Injectable()
+         export class PrismaService extends PrismaClient implements OnModuleInit {
+           async onModuleInit() {
+             await this.$connect();
+           }
+         }
+         ```
+
+   4. 모듈 생성했다면...
+
+      이 모듈을 import하는 다른 모듈에서 서비스 사용할 수 있게 export 추가
+
+      ```typescript
+      @Module({
+        providers: [PrismaService],
+        exports: [PrismaService],
+      })
+      export class PrismaModule {}
+      ```
+
+7. 테스트
+
+   1. PrismaModule을 생성했다면 알아서 AppModule에 import되므로 AppController에서 간단하게 테스트 가능
+
+      ```typescript
+      // prisma.service.ts
+      import { Injectable, OnModuleInit } from '@nestjs/common';
+      import { PrismaClient } from '@prisma/client';
+      
+      @Injectable()
+      export class PrismaService extends PrismaClient implements OnModuleInit {
+        async onModuleInit() {
+          await this.$connect();
+        }
+      
+        async getContent1() {
+          return await this.content1.findMany();
+        }
+      }
+      ```
+
+      ```typescript
+      // app.controller.ts
+      import { PrismaService } from './prisma/prisma.service';
+      import { Controller, Get } from '@nestjs/common';
+      import { AppService } from './app.service';
+      
+      @Controller()
+      export class AppController {
+        constructor(
+          private readonly appService: AppService,
+          private prismaService: PrismaService,
+        ) {}
+      
+        @Get()
+        getHello(): string {
+          return this.appService.getHello();
+        }
+      
+        @Get('/content1')
+        async getContent1() {
+          return await this.prismaService.getContent1();
+        }
+      }
+      ```
+
+   2. 위 예제 주소: 
