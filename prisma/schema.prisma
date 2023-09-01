@@ -10,35 +10,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Content1 {
+model content1 {
   id         Int                    @id @default(autoincrement())
   name       String                 @unique
-  categories ContentsOnCategories[]
+  categories contentsOnCategories[]
 }
 
-model Category1 {
+model category1 {
   id       Int                    @id @default(autoincrement())
   name     String                 @unique
-  contents ContentsOnCategories[]
+  contents contentsOnCategories[]
 }
 
-model Content2 {
+model content2 {
   id         Int         @id @default(autoincrement())
   name       String      @unique
-  categories Category2[]
+  categories category2[]
 }
 
-model Category2 {
+model category2 {
   id        Int        @id @default(autoincrement())
   name      String     @unique
-  content2s Content2[]
+  content2s content2[]
 }
 
-model ContentsOnCategories {
+model contentsOnCategories {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  content     Content1  @relation(fields: [content1Id], references: [id])
-  category    Category1 @relation(fields: [category1Id], references: [id])
+  content     content1  @relation(fields: [content1Id], references: [id])
+  category    category1 @relation(fields: [category1Id], references: [id])
   content1Id  Int
   category1Id Int
 
